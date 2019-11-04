@@ -6,6 +6,8 @@ import { DbServiceService } from '../service/db-service.service';
 
 import { Platform } from '@ionic/angular';
 
+import { ItemService } from '../service/item.service';
+
 
 @Component({
   selector: 'app-home',
@@ -18,17 +20,24 @@ export class HomePage {
   items = new Array();
   itemsFiltered: any;
 
+  otherItems = [];
+
   @ViewChild('mySearchbar', { static: false }) mySearchbar: IonSearchbar;
 
   constructor(
     public modalController: ModalController,
     private dbService: DbServiceService,
-    public platform: Platform
+    public platform: Platform,
+    private itemService: ItemService
   ) {
     this.platform.resume.subscribe(() => {
       this.dbService.restoreState().then(eltos => {
         const aux = eltos as Array<any>;
         this.items = aux;
+      });
+
+      this.itemService.restoreState().then(eltos => {
+        this.otherItems = eltos  as Array<any>;
       });
     });
 
@@ -36,6 +45,9 @@ export class HomePage {
       this.dbService.restoreState().then(eltos => {
         const aux = eltos as Array<any>;
         this.items = aux;
+      });
+      this.itemService.restoreState().then(eltos => {
+        this.otherItems = eltos  as Array<any>;
       });
     });
   }
@@ -57,6 +69,7 @@ export class HomePage {
       };
       this.items.push(this.item);
       this.dbService.addItem(this.item.index, this.item);
+      this.itemService.addItem(this.item);
       this.cleanSearchFields();
     }
   }
