@@ -1,0 +1,53 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Lista de la compra
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="ion-padding">
+    <ion-item>
+      <ion-input type="search"></ion-input>
+      <ion-searchbar inputmode="search" (ngModel)="(searchQuery)" (ionInput)="triggerInput($event)" animated
+        autocomplete="true" (ionClear)="clearSearch();" #mySearchbar>
+      </ion-searchbar>
+      <ion-icon name="add-circle" slot="end" (click)="addItem(); (mySearchbar.ionClear)"></ion-icon>
+
+    </ion-item>
+
+    <ion-list *ngIf="itemsFiltered !== undefined && itemsFiltered.length > 0"> 
+      <ion-item *ngFor="let itemFilter of itemsFiltered" (click)="addFilterItem(itemFilter.text)">
+        <ion-label>
+          {{ itemFilter.text }}
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
+    <ion-list>
+      <ion-item-sliding *ngFor="let item of items">
+        <ion-item *ngIf="!item?.isDeleted">
+          <ion-label>
+            <p *ngIf="item.isChecked" style="text-decoration: line-through;">
+              {{ item.text }}
+            </p>
+            <p *ngIf="!item.isChecked">{{ item.text }}</p>
+          </ion-label>
+          <ion-checkbox slot="start" [(ngModel)]="item.isChecked" id="{{ item?.index }}"
+            (ionChange)="checkItem($event, item.index)"></ion-checkbox>
+        </ion-item>
+        <ion-item-options side="end">
+          <ion-item-option color="secondary">
+            <ion-icon slot="icon-only" name="trash" (click)="deleteItem(item?.index)"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button>
+        <ion-icon name="trash" (click)="cleanList()"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  </div>
+</ion-content>

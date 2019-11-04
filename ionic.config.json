@@ -1,0 +1,7 @@
+{
+  "name": "practica-final",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}
