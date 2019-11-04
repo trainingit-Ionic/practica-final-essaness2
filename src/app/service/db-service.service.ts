@@ -32,10 +32,6 @@ export class DbServiceService {
     return this.storage.get(index);
   }
 
-  getItemsNotDeleted() {
-    //  return this.storage.forEach()
-  
-  }
   getAllItemsFilter(filter) {
     return new Promise((resolve, reject) => {
       const items = [];
@@ -71,16 +67,13 @@ export class DbServiceService {
     let exists = false;
     this.getAllItemsFilter(textItem).then(items => {
       const aux = items as Array<any>;
-      console.log('existItemByText ' + aux.length);
       if (aux.length <= 1) {
         exists =  false;
       } else  {
         exists = true;
       }
-      console.log('Item ' + textItem + ' exists ' + exists);
       resolve(exists);
     });
-   
   });
   }
 }

@@ -1,7 +1,5 @@
 {
   "name": "practica-final",
-  "integrations": {
-    "cordova": {}
-  },
+  "integrations": {},
   "type": "angular"
 }

@@ -2,16 +2,10 @@ import { Component } from '@angular/core';
 import { ModalController, IonSearchbar } from '@ionic/angular';
 import { ViewChild } from '@angular/core';
 
-import { DbServiceService } from '../db-service.service';
+import { DbServiceService } from '../service/db-service.service';
 
-import	{	Platform	}	from	'@ionic/angular';
+import { Platform } from '@ionic/angular';
 
-interface Item {
-  index: string;
-  text: string;
-  isChecked: boolean;
-  isDeleted: boolean;
-}
 
 @Component({
   selector: 'app-home',
@@ -23,23 +17,28 @@ export class HomePage {
   searchQuery = '';
   items = new Array();
   itemsFiltered: any;
-  
+
   @ViewChild('mySearchbar', { static: false }) mySearchbar: IonSearchbar;
 
   constructor(
     public modalController: ModalController,
     private dbService: DbServiceService,
-    public	platform:	Platform
+    public platform: Platform
   ) {
-    this.platform.resume.subscribe(
-      () => {
-        this.dbService.restoreState().then((eltos) => {
-          const aux = eltos as Array<any>;
-          this.items = aux;
-        });
-      }
-    );
-   }
+    this.platform.resume.subscribe(() => {
+      this.dbService.restoreState().then(eltos => {
+        const aux = eltos as Array<any>;
+        this.items = aux;
+      });
+    });
+
+    this.platform.ready().then(() => {
+      this.dbService.restoreState().then(eltos => {
+        const aux = eltos as Array<any>;
+        this.items = aux;
+      });
+    });
+  }
 
   addItem() {
     console.log('Add item ' + this.searchQuery);
@@ -57,11 +56,15 @@ export class HomePage {
         isDeleted: false
       };
       this.items.push(this.item);
-      this.mySearchbar.value = '';
-      this.searchQuery = '';
       this.dbService.addItem(this.item.index, this.item);
-      this.itemsFiltered = new Array();
+      this.cleanSearchFields();
     }
+  }
+
+  private cleanSearchFields() {
+    this.mySearchbar.value = '';
+    this.searchQuery = '';
+    this.itemsFiltered = new Array();
   }
   checkItem(event, index) {
     console.log('check item ' + event.target.checked + ' for index ' + index);
@@ -83,9 +86,9 @@ export class HomePage {
   }
 
   triggerInput(event) {
-    if (event.target.value.length > 3) {
-      this.searchQuery = event.target.value;
-      console.log('triggerInput ' + event.target.value);
+    this.searchQuery = event.target.value;
+    console.log('triggerInput [' + event.target.value + ']');
+    if (this.searchQuery !== '') {
       this.itemsFiltered = new Array();
       this.dbService.getAllItemsFilter(this.searchQuery).then(items => {
         console.log(items);
@@ -94,33 +97,37 @@ export class HomePage {
           console.log(this.itemsFiltered);
         }
       });
+    } else {
+      this.cleanSearchFields();
     }
   }
 
   clearSearch() {
-    console.log('clean search');
-    this.itemsFiltered = new Array();
+    this.cleanSearchFields();
   }
   addFilterItem(itemText) {
     this.pushItem(itemText);
-    this.itemsFiltered = new Array();
   }
 
+  deleteItem(item) {
+    console.log(item.index);
+    this.dbService.deleteItem(item.index, item);
 
-  deleteItem(index) {
-    console.log(index);
-    this.items.forEach((item, i) => {
-      if (item.index === index) {
-        this.dbService.deleteItem(index, item);
-      }
+    const index = this.items.findIndex((itemSearch, i) => {
+      return itemSearch.index === item.index;
     });
+    if (index > -1) {
+      this.items.splice(index, 1);
+    }
     this.printItems();
   }
 
   async cleanList() {
     console.log('acción de botón para limpiar la lista');
     this.items.forEach((item, i) => {
-      console.log('acción de botón para limpiar la lista ' + item.index + item.text);
+      console.log(
+        'acción de botón para limpiar la lista ' + item.index + item.text
+      );
       this.dbService.deleteItem(item.index, item);
     });
     this.items = new Array();
